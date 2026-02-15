@@ -1,5 +1,4 @@
 import 'package:example/image.dart';
-import 'package:example/paint.dart';
 import 'package:example/cube.dart';
 import 'package:example/object.dart';
 import 'package:example/triangle.dart';
@@ -38,7 +37,6 @@ class MenuScreen extends StatelessWidget {
         children: [
           _buildItem(context, 'Simple Cube', const SimpleCube()),
           _buildItem(context, 'Simple Image', const SimpleImage()),
-          _buildItem(context, 'Simple Paint', const SimplePaint()),
           _buildItem(context, 'Simple Object', const SimpleObject()),
           _buildItem(context, 'Simple Triangle', const RawWebGpuTriangle()),
         ],

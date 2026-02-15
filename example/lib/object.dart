@@ -51,7 +51,7 @@ struct VertexOutput {
 ''';
 
 class DrawUniforms {
-  final Pointer<Uint8> _ptr = calloc<Uint8>(80); // 64 (Mat4) + 16 (Color)
+  final Pointer<Uint8> _ptr = calloc<Uint8>(80);
   
   void update(vm.Matrix4 mvp, Color color) {
     final floatList = _ptr.cast<Float>();
@@ -232,7 +232,7 @@ class _SwordViewerState extends State<SwordViewer> with SingleTickerProviderStat
     for (int i = 0; i < _mesh!.groups.length; i++) {
       final group = _mesh!.groups[i];
       
-      // Look up color in our map, or default to pink (so we know it's missing)
+      // Look up color in our map, or default to pink so we know it's missing
       final color = _materials[group.materialName] ?? Colors.pinkAccent;
       
       cpuUniforms[i].update(mvp, color);

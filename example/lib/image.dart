@@ -77,7 +77,6 @@ class _MyAppState extends State<MyApp> {
 
       if (!_running || texture == null) break;
 
-      // 1. Lock Texture (Interop)
       texture!.beginAccess();
 
       final encoder = wgpu.wgpuDeviceCreateCommandEncoder(device, nullptr);
@@ -122,10 +121,8 @@ class _MyAppState extends State<MyApp> {
 
       wgpu.wgpuCommandBufferRelease(cmdBuf);
 
-      // 2. Unlock Texture
       texture!.endAccess();
 
-      // 3. Present
       texture!.present();
       frame++;
     }

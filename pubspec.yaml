@@ -2,7 +2,7 @@ name: webgpu_rend
 description: Direct WebGPU bindings for Flutter.
 version: 0.1.0
 homepage:
-repository: https://github.com/google/flutter-sw-rend
+repository: 
 
 environment:
   sdk: ">=3.7.0"

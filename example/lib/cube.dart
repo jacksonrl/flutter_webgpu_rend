@@ -11,7 +11,6 @@ import 'package:vector_math/vector_math.dart' as vm;
 import 'package:webgpu_rend/webgpu_rend.dart';
 import 'package:webgpu_rend/gpu_resources.dart';
 
-// --- SHADERS ---
 const String kCubeShaderWgsl = r'''
 struct Uniforms {
     modelViewProjectionMatrix : mat4x4<f32>,
@@ -42,43 +41,33 @@ fn fs_main(@location(0) fragColor : vec3<f32>) -> @location(0) vec4<f32> {
 }
 ''';
 
-// --- GEOMETRY DATA ---
-
-// 24 Vertices (4 per face * 6 faces).
-// We cannot share vertices between faces because each face has a unique color.
 Float32List cubeVertexData() {
   final List<double> vertices = [
-    // Front Face (Z=1) - Red
-    -1.0, -1.0, 1.0, 1.0, 0.0, 0.0, // BL
-    1.0, -1.0, 1.0, 1.0, 0.0, 0.0,  // BR
-    1.0, 1.0, 1.0, 1.0, 0.0, 0.0,   // TR
-    -1.0, 1.0, 1.0, 1.0, 0.0, 0.0,  // TL
+    -1.0, -1.0, 1.0, 1.0, 0.0, 0.0,
+    1.0, -1.0, 1.0, 1.0, 0.0, 0.0,
+    1.0, 1.0, 1.0, 1.0, 0.0, 0.0,
+    -1.0, 1.0, 1.0, 1.0, 0.0, 0.0,
 
-    // Back Face (Z=-1) - Green
-    1.0, -1.0, -1.0, 0.0, 1.0, 0.0, // BL (relative to back)
-    -1.0, -1.0, -1.0, 0.0, 1.0, 0.0,// BR
-    -1.0, 1.0, -1.0, 0.0, 1.0, 0.0, // TR
-    1.0, 1.0, -1.0, 0.0, 1.0, 0.0,  // TL
+    1.0, -1.0, -1.0, 0.0, 1.0, 0.0,
+    -1.0, -1.0, -1.0, 0.0, 1.0, 0.0,
+    -1.0, 1.0, -1.0, 0.0, 1.0, 0.0,
+    1.0, 1.0, -1.0, 0.0, 1.0, 0.0,
 
-    // Top Face (Y=1) - Blue
     -1.0, 1.0, 1.0, 0.0, 0.0, 1.0,
     1.0, 1.0, 1.0, 0.0, 0.0, 1.0,
     1.0, 1.0, -1.0, 0.0, 0.0, 1.0,
     -1.0, 1.0, -1.0, 0.0, 0.0, 1.0,
 
-    // Bottom Face (Y=-1) - Yellow
     -1.0, -1.0, -1.0, 1.0, 1.0, 0.0,
     1.0, -1.0, -1.0, 1.0, 1.0, 0.0,
     1.0, -1.0, 1.0, 1.0, 1.0, 0.0,
     -1.0, -1.0, 1.0, 1.0, 1.0, 0.0,
 
-    // Right Face (X=1) - Magenta
     1.0, -1.0, 1.0, 1.0, 0.0, 1.0,
     1.0, -1.0, -1.0, 1.0, 0.0, 1.0,
     1.0, 1.0, -1.0, 1.0, 0.0, 1.0,
     1.0, 1.0, 1.0, 1.0, 0.0, 1.0,
 
-    // Left Face (X=-1) - Cyan
     -1.0, -1.0, -1.0, 0.0, 1.0, 1.0,
     -1.0, -1.0, 1.0, 0.0, 1.0, 1.0,
     -1.0, 1.0, 1.0, 0.0, 1.0, 1.0,
@@ -87,21 +76,17 @@ Float32List cubeVertexData() {
   return Float32List.fromList(vertices);
 }
 
-// 36 Indices (6 faces * 2 triangles * 3 indices)
 Uint16List cubeIndexData() {
   final List<int> indices = [];
-  // For each of the 6 faces, we generate 2 triangles (0,1,2 and 0,2,3)
   for (int i = 0; i < 6; i++) {
     int base = i * 4;
     indices.addAll([
-      base + 0, base + 1, base + 2, // Tri 1
-      base + 0, base + 2, base + 3  // Tri 2
+      base + 0, base + 1, base + 2,
+      base + 0, base + 2, base + 3 
     ]);
   }
   return Uint16List.fromList(indices);
 }
-
-// --- NATIVE UNIFORM HELPER ---
 
 class NativeCameraUniforms {
   final Pointer<Float> _ptr;
@@ -142,14 +127,12 @@ class CubeScreen extends StatefulWidget {
 
 class _CubeScreenState extends State<CubeScreen>
     with SingleTickerProviderStateMixin {
-  // Textures
-  GpuTexture? canvasTexture; // The Screen (1x)
-  GpuTexture? depthTexture;  // Depth Buffer (4x)
+  GpuTexture? canvasTexture;
+  GpuTexture? depthTexture;
 
-  // Pipeline & Buffers
   GpuRenderPipeline? pipeline;
   GpuBuffer? vertexBuffer;
-  GpuBuffer? indexBuffer;    // NEW
+  GpuBuffer? indexBuffer;
   GpuBuffer? uniformBuffer;
   WGPUBindGroup? bindGroup;
 
@@ -157,7 +140,6 @@ class _CubeScreenState extends State<CubeScreen>
   late Ticker _ticker;
   double _time = 0.0;
 
-  // Settings
   final int _displayW = 800;
   final int _displayH = 600;
 
@@ -174,7 +156,6 @@ class _CubeScreenState extends State<CubeScreen>
   }
 
   Future<void> _initGpu() async {
-    // 1. Create Textures
     canvasTexture = await GpuTexture.create(width: _displayW, height: _displayH);
 
     depthTexture = GpuTexture.createDepth(
@@ -182,7 +163,6 @@ class _CubeScreenState extends State<CubeScreen>
       height: _displayH,
     );
 
-    // 2. Create Pipeline
     final shader = GpuShader.create(kCubeShaderWgsl);
     pipeline = GpuRenderPipeline.create(
       vertexShader: shader,
@@ -190,13 +170,11 @@ class _CubeScreenState extends State<CubeScreen>
       vertexEntryPoint: "vs_main",
       fragmentEntryPoint: "fs_main",
       enableDepth: true,
-      // NEW: Tell pipeline to expect 4 samples per pixel
       sampleCount: 1, 
       topology: WGPUPrimitiveTopology.WGPUPrimitiveTopology_TriangleList,
       cullMode: WGPUCullMode.WGPUCullMode_Back,
       frontFace: WGPUFrontFace.WGPUFrontFace_CCW,
       bufferLayouts: [
-        // Using your helper: Interleaved Position(3) + Color(3)
         VertexBufferLayout.fromFormats(
           [
             WGPUVertexFormat.WGPUVertexFormat_Float32x3,
@@ -207,7 +185,6 @@ class _CubeScreenState extends State<CubeScreen>
       ],
     );
 
-    // 3. Buffers
     final vData = cubeVertexData();
     vertexBuffer = GpuBuffer.create(
       size: vData.lengthInBytes,
@@ -218,7 +195,6 @@ class _CubeScreenState extends State<CubeScreen>
     final iData = cubeIndexData();
     indexBuffer = GpuBuffer.create(
       size: iData.lengthInBytes,
-      // NEW: Usage must include Index
       usage: WGPUBufferUsage_Index | WGPUBufferUsage_CopyDst,
     );
     indexBuffer!.update(iData.buffer.asUint8List());
@@ -235,7 +211,6 @@ class _CubeScreenState extends State<CubeScreen>
 
   void _onTick(Duration elapsed) {
     if (canvasTexture == null) return;
-    // Simple FPS
     if (_frameWatch.isRunning) {
       _frameTimes.add(1000.0 / _frameWatch.elapsedMilliseconds);
       if (_frameTimes.length > 60) _frameTimes.removeAt(0);
@@ -254,7 +229,6 @@ class _CubeScreenState extends State<CubeScreen>
   void _render() {
     Timeline.startSync('WebGPU Render');
 
-    // Matrix Math
     final aspect = _displayW / _displayH;
     final projection = vm.makePerspectiveMatrix(vm.radians(45), aspect, 0.1, 100.0);
     final view = vm.makeViewMatrix(
@@ -279,14 +253,10 @@ class _CubeScreenState extends State<CubeScreen>
     pass.bindPipeline(pipeline!);
     pass.setBindGroup(0, bindGroup!);
     
-    // Set Vertex Buffer (Slot 0)
     pass.setVertexBuffer(0, vertexBuffer!);
     
-    // NEW: Set Index Buffer
-    // Indices are Uint16 (Short)
     pass.setIndexBuffer(indexBuffer!, WGPUIndexFormat.WGPUIndexFormat_Uint16);
     
-    // NEW: Draw Indexed (36 indices)
     pass.drawIndexed(36);
     
     pass.end();
@@ -304,7 +274,7 @@ class _CubeScreenState extends State<CubeScreen>
     _cameraUniforms.dispose();
 
     /*
-    //disposing causes issues when going back, supposedly becuase
+    //disposing causes issues when going back, maybe becuase
     //flutter keeps trying to draw the the texture while the animation
     //slides out?
     canvasTexture?.dispose();
