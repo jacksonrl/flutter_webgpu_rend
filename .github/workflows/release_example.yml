@@ -1,0 +1,62 @@
+name: Release Example App
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set Up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'oracle'
+          java-version: '17'
+          cache: gradle
+
+      - name: Set Up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+          cache: true
+
+      - name: pub
+        run: cd example && flutter pub get
+
+      - name: keystore
+        run: |
+          keytool -genkey -v -keystore example/android/app/keystore.jks \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -alias upload \
+            -storepass 0123456789 -keypass 0123456789 \
+            -dname "CN=Test,O=Test,C=US"
+
+          echo "storePassword=0123456789" > example/android/key.properties
+          echo "keyPassword=0123456789" >> example/android/key.properties
+          echo "keyAlias=upload" >> example/android/key.properties
+          echo "storeFile=keystore.jks" >> example/android/key.properties
+
+      - name: Build APK
+        run: cd example && flutter build apk --release --split-per-abi
+
+      - name: Tag
+        id: date
+        run: echo "RELEASE_TAG=$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_ENV
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ env.RELEASE_TAG }} \
+            example/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
+            --title "Release ${{ env.RELEASE_TAG }}" \
+            --notes "Automated build from commit ${{ github.sha }}" \
+            --target ${{ github.sha }}
