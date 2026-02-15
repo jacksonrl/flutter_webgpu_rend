@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\windows",
+    "\\windows\\include",
+    "\\windows\\include\\webgpu_rend"
+  ],
+  "SelectedNode": "\\windows\\include\\webgpu_rend\\webgpu_rend_plugin_c_api.h",
+  "PreviewInSolutionExplorer": false
+}
