@@ -230,8 +230,14 @@ More examples in the example directory. A simple [gpu_resources.dart](https://gi
 
 # MacOS, iOS and Linux support
 
-If you want to add these backends, you will need to create a script that downloads the proper dawn binary, and then add some native code that creates a flutter metal texture for iOS/MacOS or an flutter opengl texture on Linux. For iOS this would involve the `FlutterTextureRegistry` Then you will need to hook up that texture to dawn using the dawn API.
+If you want to add these backends, you will need to create a script that downloads the proper dawn binary, and then add some native code that creates a flutter metal texture for iOS/MacOS or a flutter opengl texture on Linux. For iOS this would involve the `FlutterTextureRegistry`. Then you will need to hook up that texture to dawn using the dawn API.
 
 # History
 
 This project started as a fork of https://github.com/google/flutter-sw-rend which can only create bitmaps. First I added FFI to that project to reduce latency when uploading to the GPU. Then I wanted to add some shaders, so I created dx11 and OpenGL ES backends, using a shader translation layer from hlsl to glsl. Eventually that became difficult to manage so I switched to WebGPU. Becuase of this, the code quality is varried, as sections got rewritten multiple times. It would probably look different had I started from scratch.
+
+# Future work
+
+- Consider native assets/build hooks: https://pub.dev/packages/code_assets
+- Consider the upcoming embedder API: https://github.com/flutter/flutter/issues/112232 https://github.com/flutter/flutter/issues/176649
+- In the current dx11 implementation, we use a shared texture used by both dawn and flutter, which requires `beginAccess` and `endAccess` logic everywhere. This should probably be replaced with frame buffer instead, like in the Android implementation.
