@@ -6,6 +6,9 @@ Flutter bindings for WebGPU via https://github.com/google/dawn. Currently suppor
 
 Download the android apk from the [releases](https://github.com/jacksonrl/flutter_webgpu_rend/releases) tab, which uses the examples found in the [example](https://github.com/jacksonrl/flutter_webgpu_rend/tree/master/example) project.
 
+<img width="637" height="585" alt="image" src="https://github.com/user-attachments/assets/2a4a0103-a42d-4414-b145-a1ecf8c5b74f" />
+
+
 # Usage
 
 Simple usage:
